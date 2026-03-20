@@ -1,1 +1,17 @@
+- name: First Ansible Test
+  hosts: all
+  become: yes
 
+  tasks:
+    - name: Recolect facts
+      setup:
+
+    - name: Show hostname
+      debug:
+        msg: "The hostname is {{ ansible_hostname }} and the system is {{ ansible_distribution }}"
+
+    - name: Create test file
+      file:
+        path: /tmp/ansible_test.txt
+        state: touch
+        mode: '0644'
