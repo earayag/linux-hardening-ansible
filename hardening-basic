@@ -3,6 +3,12 @@
   become: yes
 
   tasks:
+    - name: Install EPEL on Rocky/RedHat
+      dnf:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat"
+
     - name: Update apt cache on Debian
       apt:
         update_cache: yes
@@ -13,20 +19,47 @@
         update_cache: yes
       when: ansible_os_family == "RedHat"
 
-    - name: Install common security packages
+    - name: Install common packages on Debian
       package:
         name:
           - vim
           - curl
           - wget
           - fail2ban
+          - chrony
         state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install common packages on Rocky/RedHat
+      package:
+        name:
+          - vim
+          - curl
+          - wget
+          - fail2ban
+          - chrony
+        state: present
+      when: ansible_os_family == "RedHat"
 
     - name: Ensure fail2ban service is enabled and running
       service:
         name: fail2ban
         state: started
         enabled: yes
+
+    - name: Ensure chrony service is enabled and running on Debian
+      service:
+        name: chrony
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure chronyd service is enabled and running on Rocky
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
 
     - name: Create hardening evidence file
       copy:
@@ -37,29 +70,3 @@
         owner: root
         group: root
         mode: '0644'
-
-    - name: Ensure chronyd is installed on Rocky
-      package:
-        name: chrony
-        state: present
-      when: ansible_os_family == "RedHat"
-
-    - name: Ensure chrony service is enabled and running on Rocky
-      service:
-        name: chronyd
-        state: started
-        enabled: yes
-      when: ansible_os_family == "RedHat"
-
-    - name: Ensure chrony is installed on Debian
-      package:
-        name: chrony
-        state: present
-      when: ansible_os_family == "Debian"
-
-    - name: Ensure chrony service is enabled and running on Debian
-      service:
-        name: chrony
-        state: started
-        enabled: yes
-      when: ansible_os_family == "Debian"
