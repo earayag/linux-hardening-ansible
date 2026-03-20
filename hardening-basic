@@ -1,0 +1,65 @@
+- name: Basic Linux Hardening
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache on Debian
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update dnf cache on Rocky/RedHat
+      dnf:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install common security packages
+      package:
+        name:
+          - vim
+          - curl
+          - wget
+          - fail2ban
+        state: present
+
+    - name: Ensure fail2ban service is enabled and running
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: Create hardening evidence file
+      copy:
+        dest: /etc/motd
+        content: |
+          Managed by Ansible
+          Basic hardening baseline applied
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure chronyd is installed on Rocky
+      package:
+        name: chrony
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure chrony service is enabled and running on Rocky
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure chrony is installed on Debian
+      package:
+        name: chrony
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure chrony service is enabled and running on Debian
+      service:
+        name: chrony
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
