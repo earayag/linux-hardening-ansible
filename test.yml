@@ -3,7 +3,7 @@
   become: yes
 
   tasks:
-    - name: Gather facts
+    - name: Gathering facts
       setup:
 
     - name: Show hostname
